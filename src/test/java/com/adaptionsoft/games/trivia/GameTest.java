@@ -1,0 +1,50 @@
+package com.adaptionsoft.games.trivia;
+
+import com.adaptionsoft.games.uglytrivia.Game;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Objects;
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class GameTest {
+
+    @Test
+    void shouldReproduceSameOutputWithGoldenMaster() throws Exception {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(out));
+
+        Random rand = new Random(12345);
+
+        Game aGame = new Game();
+        aGame.add("Chet");
+        aGame.add("Pat");
+        aGame.add("Sue");
+
+        boolean notAWinner;
+        do {
+
+            aGame.roll(rand.nextInt(5) + 1);
+            notAWinner = rand.nextInt(9) == 7
+                    ? aGame.wrongAnswer()
+                    : aGame.wasCorrectlyAnswered();
+        } while (notAWinner);
+
+        String actualOutput = out.toString();
+        assertEquals(readGoldenFile(), actualOutput);
+    }
+
+    private String readGoldenFile() throws Exception {
+        URI fileUri = Objects.requireNonNull(getClass().getResource("/data/goldenMaster_v1")).toURI();
+        Path filePath = Paths.get(fileUri);
+        return String.join("\r\n", Files.readAllLines(filePath)) + "\r\n";
+    }
+}
