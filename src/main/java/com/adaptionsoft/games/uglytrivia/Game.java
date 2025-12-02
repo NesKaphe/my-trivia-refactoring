@@ -36,6 +36,25 @@ public class Game {
         public boolean isInPenaltyBox() {
             return inPenaltyBox;
         }
+
+        private boolean didPlayerWin() {
+            return !(getPurses() == 6);
+        }
+
+        private void toPenaltyBox() {
+            inPenaltyBox = true;
+        }
+
+        private void addCoin() {
+            purses++;
+        }
+
+        private void moveBy(int roll) {
+            places += roll;
+            if (places >= BOARD_SIZE) {
+                places -= BOARD_SIZE;
+            }
+        }
     }
 
     List<Player> playerslist = new ArrayList<>();
@@ -88,7 +107,7 @@ public class Game {
                 isGettingOutOfPenaltyBox = true;
 
                 System.out.println(player.getName() + " is getting out of the penalty box");
-                moveBy(roll, playerslist.get(currentPlayer));
+                player.moveBy(roll);
 
                 System.out.println(player.getName()
                         + "'s new location is "
@@ -102,7 +121,7 @@ public class Game {
 
         } else {
 
-            moveBy(roll, playerslist.get(currentPlayer));
+            player.moveBy(roll);
 
             System.out.println(player.getName()
                     + "'s new location is "
@@ -144,13 +163,13 @@ public class Game {
         if (player.isInPenaltyBox()) {
             if (isGettingOutOfPenaltyBox) {
                 System.out.println("Answer was correct!!!!");
-                addCoin(playerslist.get(currentPlayer));
+                player.addCoin();
                 System.out.println(player.getName()
                         + " now has "
                         + player.getPurses()
                         + " Gold Coins.");
 
-                boolean winner = didPlayerWin(player);
+                boolean winner = player.didPlayerWin();
                 currentPlayer++;
                 if (currentPlayer == playerslist.size()) currentPlayer = 0;
 
@@ -165,13 +184,13 @@ public class Game {
         } else {
 
             System.out.println("Answer was corrent!!!!");
-            addCoin(playerslist.get(currentPlayer));
+            player.addCoin();
             System.out.println(player.getName()
                     + " now has "
                     + player.getPurses()
                     + " Gold Coins.");
 
-            boolean winner = didPlayerWin(playerslist.get(currentPlayer));
+            boolean winner = player.didPlayerWin();
             currentPlayer++;
             if (currentPlayer == playerslist.size()) currentPlayer = 0;
 
@@ -183,30 +202,12 @@ public class Game {
         Player player = playerslist.get(currentPlayer);
         System.out.println("Question was incorrectly answered");
         System.out.println(player.getName() + " was sent to the penalty box");
-        toPenaltyBox(playerslist.get(currentPlayer));
+        player.toPenaltyBox();
 
         currentPlayer++;
         if (currentPlayer == playerslist.size()) currentPlayer = 0;
         return true;
     }
 
-    private void moveBy(int roll, Player player) {
-        player.places += roll;
-        if (player.places >= BOARD_SIZE) {
-            player.places -= BOARD_SIZE;
-        }
-    }
 
-    private void addCoin(Player player) {
-        player.purses++;
-    }
-
-    private void toPenaltyBox(Player player) {
-        player.inPenaltyBox = true;
-    }
-
-
-    private boolean didPlayerWin(Player player) {
-        return !(player.getPurses() == 6);
-    }
 }
