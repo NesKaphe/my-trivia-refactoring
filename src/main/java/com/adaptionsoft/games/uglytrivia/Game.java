@@ -210,7 +210,6 @@ public class Game {
     }
 
     private void addCoin(int currentPlayer) {
-        purses[currentPlayer]++;
         playerslist.get(currentPlayer).purses++;
     }
 
@@ -221,6 +220,6 @@ public class Game {
 
 
     private boolean didPlayerWin() {
-        return !(purses[currentPlayer] == 6);
+        return !(playerslist.get(currentPlayer).getPurses() == 6);
     }
 }
