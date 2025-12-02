@@ -1,5 +1,7 @@
 package com.adaptionsoft.games.uglytrivia;
 
+import com.adaptionsoft.games.uglytrivia.entity.Player;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -7,55 +9,6 @@ import java.util.List;
 public class Game {
 
     public static final int BOARD_SIZE = 12;
-
-    static class Player {
-        private String name;
-        private int places;
-        private int purses;
-        private boolean inPenaltyBox;
-
-        public Player(String name) {
-            this.name = name;
-            this.places = 0;
-            this.purses = 0;
-            inPenaltyBox = false;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public int getPlaces() {
-            return places;
-        }
-
-        public int getPurses() {
-            return purses;
-        }
-
-        public boolean isInPenaltyBox() {
-            return inPenaltyBox;
-        }
-
-        private boolean didPlayerWin() {
-            return !(getPurses() == 6);
-        }
-
-        private void toPenaltyBox() {
-            inPenaltyBox = true;
-        }
-
-        private void addCoin() {
-            purses++;
-        }
-
-        private void moveBy(int roll) {
-            places += roll;
-            if (places >= BOARD_SIZE) {
-                places -= BOARD_SIZE;
-            }
-        }
-    }
 
     List<Player> playerslist = new ArrayList<>();
 
@@ -169,7 +122,7 @@ public class Game {
                         + player.getPurses()
                         + " Gold Coins.");
 
-                boolean winner = player.didPlayerWin();
+                boolean winner = player.didWin();
                 currentPlayer++;
                 if (currentPlayer == playerslist.size()) currentPlayer = 0;
 
@@ -190,7 +143,7 @@ public class Game {
                     + player.getPurses()
                     + " Gold Coins.");
 
-            boolean winner = player.didPlayerWin();
+            boolean winner = player.didWin();
             currentPlayer++;
             if (currentPlayer == playerslist.size()) currentPlayer = 0;
 
