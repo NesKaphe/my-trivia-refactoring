@@ -1,8 +1,8 @@
 package com.adaptionsoft.games.uglytrivia.entity;
 
-import com.adaptionsoft.games.uglytrivia.Game;
-
 public class Player {
+    public static final int BOARD_SIZE = 12;
+
     private final String name;
     private int places;
     private int purses;
@@ -45,8 +45,8 @@ public class Player {
 
     public void moveBy(int roll) {
         places += roll;
-        if (places >= Game.BOARD_SIZE) {
-            places -= Game.BOARD_SIZE;
+        if (places >= BOARD_SIZE) {
+            places -= BOARD_SIZE;
         }
     }
 }

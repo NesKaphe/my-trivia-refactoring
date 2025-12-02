@@ -8,8 +8,6 @@ import java.util.List;
 
 public class Game {
 
-    public static final int BOARD_SIZE = 12;
-
     List<Player> playerslist = new ArrayList<>();
 
     LinkedList popQuestions = new LinkedList();
@@ -123,13 +121,11 @@ public class Game {
                         + " Gold Coins.");
 
                 boolean winner = player.didWin();
-                currentPlayer++;
-                if (currentPlayer == playerslist.size()) currentPlayer = 0;
+                nextPlayer();
 
                 return winner;
             } else {
-                currentPlayer++;
-                if (currentPlayer == playerslist.size()) currentPlayer = 0;
+                nextPlayer();
                 return true;
             }
 
@@ -144,11 +140,15 @@ public class Game {
                     + " Gold Coins.");
 
             boolean winner = player.didWin();
-            currentPlayer++;
-            if (currentPlayer == playerslist.size()) currentPlayer = 0;
+            nextPlayer();
 
             return winner;
         }
+    }
+
+    private void nextPlayer() {
+        currentPlayer++;
+        if (currentPlayer == playerslist.size()) currentPlayer = 0;
     }
 
     public boolean wrongAnswer() {
@@ -157,8 +157,7 @@ public class Game {
         System.out.println(player.getName() + " was sent to the penalty box");
         player.toPenaltyBox();
 
-        currentPlayer++;
-        if (currentPlayer == playerslist.size()) currentPlayer = 0;
+        nextPlayer();
         return true;
     }
 
