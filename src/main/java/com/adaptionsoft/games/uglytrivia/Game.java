@@ -218,7 +218,6 @@ public class Game {
     }
 
     private void toPenaltyBox(int currentPlayer) {
-        inPenaltyBox[currentPlayer] = true;
         playerslist.get(currentPlayer).inPenaltyBox = true;
     }
 
