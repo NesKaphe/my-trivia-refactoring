@@ -10,6 +10,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
@@ -22,21 +23,26 @@ public class GameTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         System.setOut(new PrintStream(out));
 
-        Random rand = new Random(12345);
+        List<Integer> seeds = List.of(12345, 54321, 98765, 56789);
 
-        Game aGame = new Game();
-        aGame.add("Chet");
-        aGame.add("Pat");
-        aGame.add("Sue");
+        seeds.forEach(seed -> {
+            System.out.println("---Seed: " + seed + "---");
+            Random rand = new Random(seed);
 
-        boolean notAWinner;
-        do {
+            Game aGame = new Game();
+            aGame.add("Chet");
+            aGame.add("Pat");
+            aGame.add("Sue");
 
-            aGame.roll(rand.nextInt(5) + 1);
-            notAWinner = rand.nextInt(9) == 7
-                    ? aGame.wrongAnswer()
-                    : aGame.wasCorrectlyAnswered();
-        } while (notAWinner);
+            boolean notAWinner;
+            do {
+
+                aGame.roll(rand.nextInt(5) + 1);
+                notAWinner = rand.nextInt(9) == 7
+                        ? aGame.wrongAnswer()
+                        : aGame.wasCorrectlyAnswered();
+            } while (notAWinner);
+        });
 
         String actualOutput = out.toString();
         assertEquals(readGoldenFile(), actualOutput);
