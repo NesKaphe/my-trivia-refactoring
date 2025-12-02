@@ -124,11 +124,6 @@ public class Game {
     }
 
     private void moveBy(int roll) {
-        places[currentPlayer] = places[currentPlayer] + roll;
-        if (places[currentPlayer] >= BOARD_SIZE) {
-            places[currentPlayer] = places[currentPlayer] - BOARD_SIZE;
-        }
-
         Player player = playerslist.get(currentPlayer);
         player.places += roll;
         if (player.places >= BOARD_SIZE) {
