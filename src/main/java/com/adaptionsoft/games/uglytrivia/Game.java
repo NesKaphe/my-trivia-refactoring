@@ -145,15 +145,16 @@ public class Game {
 
 
     private String currentCategory() {
-        if (places[currentPlayer] == 0) return "Pop";
-        if (places[currentPlayer] == 4) return "Pop";
-        if (places[currentPlayer] == 8) return "Pop";
-        if (places[currentPlayer] == 1) return "Science";
-        if (places[currentPlayer] == 5) return "Science";
-        if (places[currentPlayer] == 9) return "Science";
-        if (places[currentPlayer] == 2) return "Sports";
-        if (places[currentPlayer] == 6) return "Sports";
-        if (places[currentPlayer] == 10) return "Sports";
+        Player player = playerslist.get(currentPlayer);
+        if (player.getPlaces() == 0) return "Pop";
+        if (player.getPlaces() == 4) return "Pop";
+        if (player.getPlaces() == 8) return "Pop";
+        if (player.getPlaces() == 1) return "Science";
+        if (player.getPlaces() == 5) return "Science";
+        if (player.getPlaces() == 9) return "Science";
+        if (player.getPlaces() == 2) return "Sports";
+        if (player.getPlaces() == 6) return "Sports";
+        if (player.getPlaces() == 10) return "Sports";
         return "Rock";
     }
 
