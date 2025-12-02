@@ -85,7 +85,7 @@ public class Game {
     }
 
     public int howManyPlayers() {
-        return players.size();
+        return playerslist.size();
     }
 
     public void roll(int roll) {
@@ -170,12 +170,12 @@ public class Game {
 
                 boolean winner = didPlayerWin();
                 currentPlayer++;
-                if (currentPlayer == players.size()) currentPlayer = 0;
+                if (currentPlayer == playerslist.size()) currentPlayer = 0;
 
                 return winner;
             } else {
                 currentPlayer++;
-                if (currentPlayer == players.size()) currentPlayer = 0;
+                if (currentPlayer == playerslist.size()) currentPlayer = 0;
                 return true;
             }
 
@@ -191,7 +191,7 @@ public class Game {
 
             boolean winner = didPlayerWin();
             currentPlayer++;
-            if (currentPlayer == players.size()) currentPlayer = 0;
+            if (currentPlayer == playerslist.size()) currentPlayer = 0;
 
             return winner;
         }
@@ -204,7 +204,7 @@ public class Game {
         toPenaltyBox(currentPlayer);
 
         currentPlayer++;
-        if (currentPlayer == players.size()) currentPlayer = 0;
+        if (currentPlayer == playerslist.size()) currentPlayer = 0;
         return true;
     }
 
