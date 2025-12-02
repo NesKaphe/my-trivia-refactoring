@@ -1,34 +1,27 @@
 package com.adaptionsoft.games.uglytrivia;
 
+import com.adaptionsoft.games.uglytrivia.entity.Category;
 import com.adaptionsoft.games.uglytrivia.entity.Player;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class Game {
 
     List<Player> playerslist = new ArrayList<>();
 
-    LinkedList popQuestions = new LinkedList();
-    LinkedList scienceQuestions = new LinkedList();
-    LinkedList sportsQuestions = new LinkedList();
-    LinkedList rockQuestions = new LinkedList();
+    private final EnumMap<Category, Deque<String>> questions = new EnumMap<>(Category.class);
 
     int currentPlayer = 0;
     boolean isGettingOutOfPenaltyBox;
 
     public Game() {
-        for (int i = 0; i < 50; i++) {
-            popQuestions.addLast("Pop Question " + i);
-            scienceQuestions.addLast(("Science Question " + i));
-            sportsQuestions.addLast(("Sports Question " + i));
-            rockQuestions.addLast(createRockQuestion(i));
+        for(var category : Category.values()) {
+            Deque<String> deck = new LinkedList<>();
+            for (int i = 0; i < 50; i++) {
+                deck.addLast(category + " Question " + i);
+            }
+            questions.put(category, deck);
         }
-    }
-
-    public String createRockQuestion(int index) {
-        return "Rock Question " + index;
     }
 
     public boolean isPlayable() {
@@ -76,29 +69,23 @@ public class Game {
     }
 
     private void askQuestion() {
-        if (currentCategory() == "Pop")
-            System.out.println(popQuestions.removeFirst());
-        if (currentCategory() == "Science")
-            System.out.println(scienceQuestions.removeFirst());
-        if (currentCategory() == "Sports")
-            System.out.println(sportsQuestions.removeFirst());
-        if (currentCategory() == "Rock")
-            System.out.println(rockQuestions.removeFirst());
+        Category category = currentCategory();
+        System.out.println(questions.get(category).removeFirst());
     }
 
 
-    private String currentCategory() {
+    private Category currentCategory() {
         Player player = playerslist.get(currentPlayer);
-        if (player.getPlaces() == 0) return "Pop";
-        if (player.getPlaces() == 4) return "Pop";
-        if (player.getPlaces() == 8) return "Pop";
-        if (player.getPlaces() == 1) return "Science";
-        if (player.getPlaces() == 5) return "Science";
-        if (player.getPlaces() == 9) return "Science";
-        if (player.getPlaces() == 2) return "Sports";
-        if (player.getPlaces() == 6) return "Sports";
-        if (player.getPlaces() == 10) return "Sports";
-        return "Rock";
+        if (player.getPlaces() == 0) return Category.POP;
+        if (player.getPlaces() == 4) return Category.POP;
+        if (player.getPlaces() == 8) return Category.POP;
+        if (player.getPlaces() == 1) return Category.SCIENCE;
+        if (player.getPlaces() == 5) return Category.SCIENCE;
+        if (player.getPlaces() == 9) return Category.SCIENCE;
+        if (player.getPlaces() == 2) return Category.SPORTS;
+        if (player.getPlaces() == 6) return Category.SPORTS;
+        if (player.getPlaces() == 10) return Category.SPORTS;
+        return Category.ROCK;
     }
 
     public boolean wasCorrectlyAnswered() {
