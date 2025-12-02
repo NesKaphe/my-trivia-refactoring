@@ -32,6 +32,10 @@ public class Game {
         public int getPurses() {
             return purses;
         }
+
+        public boolean isInPenaltyBox() {
+            return inPenaltyBox;
+        }
     }
 
     ArrayList<String> players = new ArrayList<>();
@@ -89,7 +93,7 @@ public class Game {
         System.out.println(player.getName() + " is the current player");
         System.out.println("They have rolled a " + roll);
 
-        if (inPenaltyBox[currentPlayer]) {
+        if (player.isInPenaltyBox()) {
             if (roll % 2 != 0) {
                 isGettingOutOfPenaltyBox = true;
 
@@ -160,7 +164,7 @@ public class Game {
 
     public boolean wasCorrectlyAnswered() {
         Player player = playerslist.get(currentPlayer);
-        if (inPenaltyBox[currentPlayer]) {
+        if (player.isInPenaltyBox()) {
             if (isGettingOutOfPenaltyBox) {
                 System.out.println("Answer was correct!!!!");
                 addCoin(currentPlayer);
