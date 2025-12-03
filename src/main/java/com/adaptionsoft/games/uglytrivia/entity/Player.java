@@ -32,7 +32,7 @@ public class Player {
     }
 
     public boolean didWin() {
-        return !(getPurses() == 6);
+        return purses == 6;
     }
 
     public void toPenaltyBox() {
@@ -44,9 +44,6 @@ public class Player {
     }
 
     public void moveBy(int roll) {
-        places += roll;
-        if (places >= BOARD_SIZE) {
-            places -= BOARD_SIZE;
-        }
+        places = (places + roll) % BOARD_SIZE;
     }
 }

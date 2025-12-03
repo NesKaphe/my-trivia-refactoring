@@ -7,14 +7,17 @@ import java.util.*;
 
 public class Game {
 
-    List<Player> playerslist = new ArrayList<>();
+    private final List<Player> players;
 
-    private final EnumMap<Category, Deque<String>> questions = new EnumMap<>(Category.class);
+    private final EnumMap<Category, Deque<String>> questions;
 
     int currentPlayer = 0;
     boolean isGettingOutOfPenaltyBox;
 
     public Game() {
+        players = new ArrayList<>();
+        questions = new EnumMap<>(Category.class);
+
         for(var category : Category.values()) {
             Deque<String> deck = new LinkedList<>();
             for (int i = 0; i < 50; i++) {
@@ -22,6 +25,7 @@ public class Game {
             }
             questions.put(category, deck);
         }
+
     }
 
     public boolean isPlayable() {
@@ -30,19 +34,19 @@ public class Game {
 
     public boolean add(String playerName) {
 
-		playerslist.add(new Player(playerName));
+		players.add(new Player(playerName));
 
         System.out.println(playerName + " was added");
-        System.out.println("They are player number " + playerslist.size());
+        System.out.println("They are player number " + players.size());
         return true;
     }
 
     public int howManyPlayers() {
-        return playerslist.size();
+        return players.size();
     }
 
     public void roll(int roll) {
-        Player player = playerslist.get(currentPlayer);
+        Player player = players.get(currentPlayer);
         System.out.println(player.getName() + " is the current player");
         System.out.println("They have rolled a " + roll);
 
@@ -58,38 +62,35 @@ public class Game {
         }
 
         player.moveBy(roll);
-
         System.out.println(player.getName()
                 + "'s new location is "
                 + player.getPlaces());
-        System.out.println("The category is " + currentCategory());
 
-        askQuestion();
+        Category category = currentCategory();
+        System.out.println("The category is " + category);
+
+        askQuestion(category);
 
     }
 
-    private void askQuestion() {
-        Category category = currentCategory();
+    private void askQuestion(Category category) {
         System.out.println(questions.get(category).removeFirst());
     }
 
 
     private Category currentCategory() {
-        Player player = playerslist.get(currentPlayer);
-        if (player.getPlaces() == 0) return Category.POP;
-        if (player.getPlaces() == 4) return Category.POP;
-        if (player.getPlaces() == 8) return Category.POP;
-        if (player.getPlaces() == 1) return Category.SCIENCE;
-        if (player.getPlaces() == 5) return Category.SCIENCE;
-        if (player.getPlaces() == 9) return Category.SCIENCE;
-        if (player.getPlaces() == 2) return Category.SPORTS;
-        if (player.getPlaces() == 6) return Category.SPORTS;
-        if (player.getPlaces() == 10) return Category.SPORTS;
-        return Category.ROCK;
+        Player player = players.get(currentPlayer);
+
+        return switch (player.getPlaces() % 4) {
+            case 0 -> Category.POP;
+            case 1 -> Category.SCIENCE;
+            case 2 -> Category.SPORTS;
+            default -> Category.ROCK;
+        };
     }
 
     public boolean wasCorrectlyAnswered() {
-        Player player = playerslist.get(currentPlayer);
+        Player player = players.get(currentPlayer);
 
         if (player.isInPenaltyBox()) {
             if (!isGettingOutOfPenaltyBox) {
@@ -98,32 +99,39 @@ public class Game {
             }
         }
 
-        System.out.println("Answer was correct!!!!");
         player.addCoin();
+
+        System.out.println("Answer was correct!!!!");
         System.out.println(player.getName()
                 + " now has "
                 + player.getPurses()
                 + " Gold Coins.");
 
-        boolean winner = player.didWin();
-        nextPlayer();
-
-        return winner;
+        return endOfTurn(player);
     }
 
     public boolean wrongAnswer() {
-        Player player = playerslist.get(currentPlayer);
+        Player player = players.get(currentPlayer);
+
+        printWrongAnswer(player);
+
+        player.toPenaltyBox();
+        return endOfTurn(player);
+    }
+
+    private static void printWrongAnswer(Player player) {
         System.out.println("Question was incorrectly answered");
         System.out.println(player.getName() + " was sent to the penalty box");
-        player.toPenaltyBox();
+    }
 
+    private boolean endOfTurn(Player player) {
         nextPlayer();
-        return true;
+        return !player.didWin();
     }
 
     private void nextPlayer() {
         currentPlayer++;
-        if (currentPlayer == playerslist.size()) currentPlayer = 0;
+        if (currentPlayer == players.size()) currentPlayer = 0;
     }
 
 }
