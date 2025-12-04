@@ -25,56 +25,51 @@ public class Game {
             }
             questions.put(category, deck);
         }
-
-    }
-
-    public boolean isPlayable() {
-        return (howManyPlayers() >= 2);
     }
 
     public boolean add(String playerName) {
 
 		players.add(new Player(playerName));
 
-        System.out.println(playerName + " was added");
-        System.out.println("They are player number " + players.size());
+        printPlayerAdded(playerName, players.size());
         return true;
-    }
-
-    public int howManyPlayers() {
-        return players.size();
     }
 
     public void roll(int roll) {
         Player player = players.get(currentPlayer);
-        System.out.println(player.getName() + " is the current player");
-        System.out.println("They have rolled a " + roll);
+        printPlayerRoll(player, roll);
+
 
         if (player.isInPenaltyBox()) {
-            if (roll % 2 == 0) {
-                System.out.println(player.getName() + " is not getting out of the penalty box");
-                isGettingOutOfPenaltyBox = false;
-                return;
-            }
+            printPenaltyBoxExitStatus(roll, player);
+        }
 
-            System.out.println(player.getName() + " is getting out of the penalty box");
-            isGettingOutOfPenaltyBox = true;
+        if (!canMove(roll, player)) {
+            return;
         }
 
         player.moveBy(roll);
-        System.out.println(player.getName()
-                + "'s new location is "
-                + player.getPlaces());
-
         Category category = currentCategory();
-        System.out.println("The category is " + category);
+        String question = takeQuestionFor(category);
 
-        askQuestion(category);
+        printRollOutcome(player, category, question);
 
     }
 
-    private void askQuestion(Category category) {
-        System.out.println(questions.get(category).removeFirst());
+    private boolean canMove(int roll, Player player) {
+        if (player.isInPenaltyBox()) {
+            isGettingOutOfPenaltyBox = canGetOutOfPenaltyBoxWith(roll);
+            return isGettingOutOfPenaltyBox;
+        }
+        return true;
+    }
+
+    private boolean canGetOutOfPenaltyBoxWith(int roll) {
+        return roll % 2 != 0;
+    }
+
+    private String takeQuestionFor(Category category) {
+        return questions.get(category).removeFirst();
     }
 
 
@@ -92,36 +87,29 @@ public class Game {
     public boolean wasCorrectlyAnswered() {
         Player player = players.get(currentPlayer);
 
-        if (player.isInPenaltyBox()) {
-            if (!isGettingOutOfPenaltyBox) {
-                nextPlayer();
-                return true;
-            }
+        if (canAnswerQuestion(player)) {
+            player.addCoin();
+            printCorrectAnswer(player);
         }
 
-        player.addCoin();
-
-        System.out.println("Answer was correct!!!!");
-        System.out.println(player.getName()
-                + " now has "
-                + player.getPurses()
-                + " Gold Coins.");
-
         return endOfTurn(player);
+    }
+
+    private boolean canAnswerQuestion(Player player) {
+        if (player.isInPenaltyBox()) {
+            return isGettingOutOfPenaltyBox;
+        }
+        return true;
     }
 
     public boolean wrongAnswer() {
         Player player = players.get(currentPlayer);
 
+        player.toPenaltyBox();
+
         printWrongAnswer(player);
 
-        player.toPenaltyBox();
         return endOfTurn(player);
-    }
-
-    private static void printWrongAnswer(Player player) {
-        System.out.println("Question was incorrectly answered");
-        System.out.println(player.getName() + " was sent to the penalty box");
     }
 
     private boolean endOfTurn(Player player) {
@@ -132,6 +120,45 @@ public class Game {
     private void nextPlayer() {
         currentPlayer++;
         if (currentPlayer == players.size()) currentPlayer = 0;
+    }
+
+    private void printPlayerAdded(String playerName, int playerNumber) {
+        System.out.println(playerName + " was added");
+        System.out.println("They are player number " + playerNumber);
+    }
+
+    private static void printPlayerRoll(Player player, int roll) {
+        System.out.println(player.getName() + " is the current player");
+        System.out.println("They have rolled a " + roll);
+    }
+
+    private void printPenaltyBoxExitStatus(int roll, Player player) {
+        if (canGetOutOfPenaltyBoxWith(roll)) {
+            System.out.println(player.getName() + " is getting out of the penalty box");
+        } else {
+            System.out.println(player.getName() + " is not getting out of the penalty box");
+        }
+    }
+
+    private static void printRollOutcome(Player player, Category category, String question) {
+        System.out.println(player.getName()
+                + "'s new location is "
+                + player.getPlaces());
+        System.out.println("The category is " + category);
+        System.out.println(question);
+    }
+
+    private static void printCorrectAnswer(Player player) {
+        System.out.println("Answer was correct!!!!");
+        System.out.println(player.getName()
+                + " now has "
+                + player.getPurses()
+                + " Gold Coins.");
+    }
+
+    private static void printWrongAnswer(Player player) {
+        System.out.println("Question was incorrectly answered");
+        System.out.println(player.getName() + " was sent to the penalty box");
     }
 
 }
