@@ -1,7 +1,7 @@
 package com.adaptionsoft.games.trivia;
 
 import com.adaptionsoft.games.uglytrivia.Game;
-import org.junit.jupiter.api.Assertions;
+import com.adaptionsoft.games.uglytrivia.out.GameConsoleOutput;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -29,7 +29,7 @@ public class GameTest {
             System.out.println("---Seed: " + seed + "---");
             Random rand = new Random(seed);
 
-            Game aGame = new Game();
+            Game aGame = new Game(new GameConsoleOutput());
             aGame.add("Chet");
             aGame.add("Pat");
             aGame.add("Sue");

@@ -2,6 +2,7 @@ package com.adaptionsoft.games.uglytrivia;
 
 import com.adaptionsoft.games.uglytrivia.entity.Category;
 import com.adaptionsoft.games.uglytrivia.entity.Player;
+import com.adaptionsoft.games.uglytrivia.out.GameOutput;
 
 import java.util.*;
 
@@ -10,12 +11,12 @@ public class Game {
     private final List<Player> players;
     private final EnumMap<Category, Deque<String>> questions;
     
-    private final GameConsoleOutput gameOutput;
+    private final GameOutput gameOutput;
 
     int currentPlayer = 0;
     boolean isGettingOutOfPenaltyBox;
 
-    public Game() {
+    public Game(GameOutput gameOutput) {
         players = new ArrayList<>();
         questions = new EnumMap<>(Category.class);
 
@@ -26,7 +27,7 @@ public class Game {
             }
             questions.put(category, deck);
         }
-        gameOutput = new GameConsoleOutput();
+        this.gameOutput = gameOutput;
     }
 
     public boolean add(String playerName) {
@@ -43,7 +44,7 @@ public class Game {
 
 
         if (player.isInPenaltyBox()) {
-            gameOutput.printPenaltyBoxExitStatus(roll, player, this);
+            gameOutput.printPenaltyBoxExitStatus(player, canGetOutOfPenaltyBoxWith(roll));
         }
 
         if (!canMove(roll, player)) {
@@ -124,45 +125,4 @@ public class Game {
         if (currentPlayer == players.size()) currentPlayer = 0;
     }
 
-    static class GameConsoleOutput {
-
-        public void printWrongAnswer(Player player) {
-            System.out.println("Question was incorrectly answered");
-            System.out.println(player.getName() + " was sent to the penalty box");
-        }
-
-        public void printCorrectAnswer(Player player) {
-            System.out.println("Answer was correct!!!!");
-            System.out.println(player.getName()
-                    + " now has "
-                    + player.getPurses()
-                    + " Gold Coins.");
-        }
-
-        public void printRollOutcome(Player player, Category category, String question) {
-            System.out.println(player.getName()
-                    + "'s new location is "
-                    + player.getPlaces());
-            System.out.println("The category is " + category);
-            System.out.println(question);
-        }
-
-        public void printPenaltyBoxExitStatus(int roll, Player player, Game game) {
-            if (game.canGetOutOfPenaltyBoxWith(roll)) {
-                System.out.println(player.getName() + " is getting out of the penalty box");
-            } else {
-                System.out.println(player.getName() + " is not getting out of the penalty box");
-            }
-        }
-
-        public void printPlayerRoll(Player player, int roll) {
-            System.out.println(player.getName() + " is the current player");
-            System.out.println("They have rolled a " + roll);
-        }
-
-        public void printPlayerAdded(String playerName, int playerNumber) {
-            System.out.println(playerName + " was added");
-            System.out.println("They are player number " + playerNumber);
-        }
-    }
 }
