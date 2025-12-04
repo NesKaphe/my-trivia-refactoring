@@ -14,5 +14,5 @@ public interface GameOutput {
 
     void printPlayerRoll(Player player, int roll);
 
-    void printPlayerAdded(String playerName, int playerNumber);
+    void printPlayerAdded(Player player, int playerNumber);
 }

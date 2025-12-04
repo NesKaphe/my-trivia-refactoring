@@ -45,8 +45,8 @@ public class GameConsoleOutput implements GameOutput {
     }
 
     @Override
-    public void printPlayerAdded(String playerName, int playerNumber) {
-        System.out.println(playerName + " was added");
+    public void printPlayerAdded(Player player, int playerNumber) {
+        System.out.println(player.getName() + " was added");
         System.out.println("They are player number " + playerNumber);
     }
 }

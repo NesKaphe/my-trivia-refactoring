@@ -14,7 +14,6 @@ public class Game {
     private final GameOutput gameOutput;
 
     int currentPlayer = 0;
-    boolean isGettingOutOfPenaltyBox;
 
     public Game(GameOutput gameOutput) {
         players = new ArrayList<>();
@@ -32,9 +31,10 @@ public class Game {
 
     public boolean add(String playerName) {
 
-		players.add(new Player(playerName));
+        Player player = new Player(playerName);
+        players.add(player);
 
-        gameOutput.printPlayerAdded(playerName, players.size());
+        gameOutput.printPlayerAdded(player, players.size());
         return true;
     }
 
@@ -44,11 +44,14 @@ public class Game {
 
 
         if (player.isInPenaltyBox()) {
-            gameOutput.printPenaltyBoxExitStatus(player, canGetOutOfPenaltyBoxWith(roll));
-        }
+            boolean canGetOutOfPenaltyBox = canGetOutOfPenaltyBoxWith(roll);
+            gameOutput.printPenaltyBoxExitStatus(player, canGetOutOfPenaltyBox);
 
-        if (!canMove(roll, player)) {
-            return;
+            if(!canGetOutOfPenaltyBox) {
+                return;
+            }
+
+            player.releaseFromPenaltyBox();
         }
 
         player.moveBy(roll);
@@ -57,14 +60,6 @@ public class Game {
 
         gameOutput.printRollOutcome(player, category, question);
 
-    }
-
-    private boolean canMove(int roll, Player player) {
-        if (player.isInPenaltyBox()) {
-            isGettingOutOfPenaltyBox = canGetOutOfPenaltyBoxWith(roll);
-            return isGettingOutOfPenaltyBox;
-        }
-        return true;
     }
 
     private boolean canGetOutOfPenaltyBoxWith(int roll) {
@@ -99,18 +94,17 @@ public class Game {
     }
 
     private boolean canAnswerQuestion(Player player) {
-        if (player.isInPenaltyBox()) {
-            return isGettingOutOfPenaltyBox;
-        }
-        return true;
+        return !player.isInPenaltyBox();
     }
 
     public boolean wrongAnswer() {
         Player player = players.get(currentPlayer);
 
-        player.toPenaltyBox();
+        if(canAnswerQuestion(player)) {
+            gameOutput.printWrongAnswer(player);
 
-        gameOutput.printWrongAnswer(player);
+            player.toPenaltyBox();
+        }
 
         return endOfTurn(player);
     }

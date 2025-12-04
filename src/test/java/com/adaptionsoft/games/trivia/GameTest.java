@@ -1,56 +1,194 @@
 package com.adaptionsoft.games.trivia;
 
+import com.adaptionsoft.games.trivia.out.GameOutputAdapter;
 import com.adaptionsoft.games.uglytrivia.Game;
-import com.adaptionsoft.games.uglytrivia.out.GameConsoleOutput;
+import com.adaptionsoft.games.uglytrivia.entity.Category;
+import com.adaptionsoft.games.uglytrivia.entity.Player;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class GameTest {
 
-    @Test
-    void shouldReproduceSameOutputWithGoldenMaster() throws Exception {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(out));
+    private FakeOutput gameOutput;
+    private Game aGame;
 
-        List<Integer> seeds = List.of(12345, 54321, 98765, 56789);
-
-        seeds.forEach(seed -> {
-            System.out.println("---Seed: " + seed + "---");
-            Random rand = new Random(seed);
-
-            Game aGame = new Game(new GameConsoleOutput());
-            aGame.add("Chet");
-            aGame.add("Pat");
-            aGame.add("Sue");
-
-            boolean notAWinner;
-            do {
-
-                aGame.roll(rand.nextInt(5) + 1);
-                notAWinner = rand.nextInt(9) == 7
-                        ? aGame.wrongAnswer()
-                        : aGame.wasCorrectlyAnswered();
-            } while (notAWinner);
-        });
-
-        String actualOutput = out.toString();
-        assertEquals(readGoldenFile(), actualOutput);
+    @BeforeEach
+    void setUp() {
+        gameOutput = new FakeOutput();
+        aGame = new Game(gameOutput);
+        aGame.add("Chet");
+        aGame.add("Pat");
     }
 
-    private String readGoldenFile() throws Exception {
-        URI fileUri = Objects.requireNonNull(getClass().getResource("/data/goldenMaster_v1")).toURI();
-        Path filePath = Paths.get(fileUri);
-        return String.join("\r\n", Files.readAllLines(filePath)) + "\r\n";
+    @Test
+    void playerShouldGoToPenaltyBoxOnWrongAnswer() {
+        aGame.roll(1);
+        aGame.wrongAnswer();
+
+        Optional<Player> chet = gameOutput.getCapturedPlayer("Chet");
+        assertTrue(chet.isPresent());
+        assertTrue(chet.get().isInPenaltyBox());
+    }
+
+
+    @Test
+    void playerShouldNotGoToPenaltyBoxOnCorrectAnswer() {
+        aGame.roll(1);
+        aGame.wasCorrectlyAnswered();
+
+        Optional<Player> chet = gameOutput.getCapturedPlayer("Chet");
+        assertTrue(chet.isPresent());
+        assertFalse(chet.get().isInPenaltyBox());
+    }
+
+    @Test
+    void playersRotationShouldOccurEachTurn() {
+        // First player
+        aGame.roll(1);
+
+        Optional<Player> chet = gameOutput.getCapturedPlayer("Chet");
+        assertTrue(chet.isPresent());
+        assertEquals(gameOutput.getCurrentPlayer(), chet.get());
+
+        aGame.wrongAnswer();
+
+        //Second player
+        aGame.roll(1);
+
+        Optional<Player> pat = gameOutput.getCapturedPlayer("Pat");
+        assertTrue(pat.isPresent());
+        assertEquals(gameOutput.getCurrentPlayer(), pat.get());
+
+        aGame.wasCorrectlyAnswered();
+
+        // Back to first player
+        aGame.roll(1);
+        chet = gameOutput.getCapturedPlayer("Chet");
+        assertTrue(chet.isPresent());
+        assertEquals(gameOutput.getCurrentPlayer(), chet.get());
+    }
+
+    @Test
+    void playerShouldNotGetOutOfPenaltyBoxOnPairRollWhenAlreadyInPenaltyBox() {
+        aGame.roll(1);
+        aGame.wrongAnswer();
+
+        aGame.roll(1);
+        aGame.wasCorrectlyAnswered();
+
+        aGame.roll(2);
+
+        Optional<Player> chet = gameOutput.getCapturedPlayer("Chet");
+        assertTrue(chet.isPresent());
+        assertTrue(chet.get().isInPenaltyBox());
+    }
+
+    @Test
+    void playerInPenaltyBoxShouldNotGetToAnswerCorrectlyToQuestion() {
+        aGame.roll(1);
+        aGame.wrongAnswer();
+
+        aGame.roll(1);
+        aGame.wasCorrectlyAnswered();
+
+        aGame.roll(2);
+
+        assertFalse(gameOutput.isCurrentTurnQuestionAsked());
+
+        aGame.wasCorrectlyAnswered();
+        assertEquals(0, gameOutput.getCurrentTurnCorrectAnswers());
+    }
+
+    @Test
+    void playerInPenaltyBoxShouldNotGetToAnswerIncorrectlyToQuestion() {
+        aGame.roll(1);
+        aGame.wrongAnswer();
+
+        aGame.roll(1);
+        aGame.wasCorrectlyAnswered();
+
+        aGame.roll(2);
+        assertFalse(gameOutput.isCurrentTurnQuestionAsked());
+
+        aGame.wrongAnswer();
+        assertEquals(0, gameOutput.getCurrentTurnWrongAnswers());
+    }
+
+    @Test
+    void playerInPenaltyBoxShouldGetOutOfPenaltyBoxOnOddRoll() {
+        aGame.roll(1);
+        aGame.wrongAnswer();
+
+        aGame.roll(1);
+        aGame.wasCorrectlyAnswered();
+
+        aGame.roll(3);
+
+        Optional<Player> chet = gameOutput.getCapturedPlayer("Chet");
+        assertTrue(chet.isPresent());
+        assertFalse(chet.get().isInPenaltyBox());
+    }
+
+    static class FakeOutput extends GameOutputAdapter {
+        private final List<Player> capturedPlayers = new ArrayList<>();
+        private Player currentPlayer;
+
+        private boolean currentTurnQuestionAsked = false;
+        private int currentTurnCorrectAnswers = 0;
+        private int currentTurnWrongAnswers = 0;
+
+        @Override
+        public void printPlayerAdded(Player player, int playerNumber) {
+            capturedPlayers.add(player);
+        }
+
+        @Override
+        public void printPlayerRoll(Player player, int roll) {
+            currentPlayer = player;
+            currentTurnCorrectAnswers = 0;
+            currentTurnWrongAnswers = 0;
+            currentTurnQuestionAsked = false;
+        }
+
+        @Override
+        public void printRollOutcome(Player player, Category category, String question) {
+            currentTurnQuestionAsked = true;
+        }
+
+        @Override
+        public void printWrongAnswer(Player player) {
+            currentTurnWrongAnswers++;
+        }
+
+        @Override
+        public void printCorrectAnswer(Player player) {
+            currentTurnCorrectAnswers++;
+        }
+
+        public Optional<Player> getCapturedPlayer(String playerName) {
+            return capturedPlayers.stream().filter(player -> player.getName().equals(playerName)).findFirst();
+        }
+
+        public Player getCurrentPlayer() {
+            return currentPlayer;
+        }
+
+        public int getCurrentTurnCorrectAnswers() {
+            return currentTurnCorrectAnswers;
+        }
+
+        public int getCurrentTurnWrongAnswers() {
+            return currentTurnWrongAnswers;
+        }
+
+        public boolean isCurrentTurnQuestionAsked() {
+            return currentTurnQuestionAsked;
+        }
     }
 }

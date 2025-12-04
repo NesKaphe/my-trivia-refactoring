@@ -46,4 +46,8 @@ public class Player {
     public void moveBy(int roll) {
         places = (places + roll) % BOARD_SIZE;
     }
+
+    public void releaseFromPenaltyBox() {
+        inPenaltyBox = false;
+    }
 }
