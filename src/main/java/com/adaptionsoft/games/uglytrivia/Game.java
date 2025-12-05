@@ -2,14 +2,16 @@ package com.adaptionsoft.games.uglytrivia;
 
 import com.adaptionsoft.games.uglytrivia.entity.Category;
 import com.adaptionsoft.games.uglytrivia.entity.Player;
+import com.adaptionsoft.games.uglytrivia.entity.QuestionBank;
 import com.adaptionsoft.games.uglytrivia.out.GameOutput;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Game {
 
     private final List<Player> players;
-    private final EnumMap<Category, Deque<String>> questions;
+    private final QuestionBank questionBank;
     
     private final GameOutput gameOutput;
 
@@ -17,15 +19,7 @@ public class Game {
 
     public Game(GameOutput gameOutput) {
         players = new ArrayList<>();
-        questions = new EnumMap<>(Category.class);
-
-        for(var category : Category.values()) {
-            Deque<String> deck = new LinkedList<>();
-            for (int i = 0; i < 50; i++) {
-                deck.addLast(category + " Question " + i);
-            }
-            questions.put(category, deck);
-        }
+        questionBank = QuestionBank.createDefaultQuestionBank();
         this.gameOutput = gameOutput;
     }
 
@@ -55,31 +49,24 @@ public class Game {
         }
 
         player.moveBy(roll);
-        Category category = currentCategory();
-        String question = takeQuestionFor(category);
+        Category category = categoryFor(player);
+        String question = questionBank.drawQuestionFor(category);
 
         gameOutput.printRollOutcome(player, category, question);
 
     }
 
-    private boolean canGetOutOfPenaltyBoxWith(int roll) {
-        return roll % 2 != 0;
-    }
-
-    private String takeQuestionFor(Category category) {
-        return questions.get(category).removeFirst();
-    }
-
-
-    private Category currentCategory() {
-        Player player = players.get(currentPlayer);
-
+    private Category categoryFor(Player player) {
         return switch (player.getPlaces() % 4) {
             case 0 -> Category.POP;
             case 1 -> Category.SCIENCE;
             case 2 -> Category.SPORTS;
             default -> Category.ROCK;
         };
+    }
+
+    private boolean canGetOutOfPenaltyBoxWith(int roll) {
+        return roll % 2 != 0;
     }
 
     public boolean wasCorrectlyAnswered() {
