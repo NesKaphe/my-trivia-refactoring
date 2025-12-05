@@ -1,7 +1,10 @@
 package com.adaptionsoft.games.trivia;
 
 import com.adaptionsoft.games.uglytrivia.Game;
+import com.adaptionsoft.games.uglytrivia.entity.QuestionBank;
 import com.adaptionsoft.games.uglytrivia.out.GameConsoleOutput;
+import com.adaptionsoft.games.uglytrivia.rule.DefaultCategoryRule;
+import com.adaptionsoft.games.uglytrivia.rule.DefaultPenaltyBoxRule;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -29,7 +32,7 @@ public class GameGoldenMasterTest {
             System.out.println("---Seed: " + seed + "---");
             Random rand = new Random(seed);
 
-            Game aGame = new Game(new GameConsoleOutput());
+            Game aGame = new Game(new GameConsoleOutput(), QuestionBank.createDefaultQuestionBank(), new DefaultCategoryRule(), new DefaultPenaltyBoxRule());
             aGame.add("Chet");
             aGame.add("Pat");
             aGame.add("Sue");

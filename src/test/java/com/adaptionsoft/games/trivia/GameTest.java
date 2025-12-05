@@ -4,6 +4,9 @@ import com.adaptionsoft.games.trivia.out.GameOutputAdapter;
 import com.adaptionsoft.games.uglytrivia.Game;
 import com.adaptionsoft.games.uglytrivia.entity.Category;
 import com.adaptionsoft.games.uglytrivia.entity.Player;
+import com.adaptionsoft.games.uglytrivia.entity.QuestionBank;
+import com.adaptionsoft.games.uglytrivia.rule.DefaultCategoryRule;
+import com.adaptionsoft.games.uglytrivia.rule.DefaultPenaltyBoxRule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +24,7 @@ public class GameTest {
     @BeforeEach
     void setUp() {
         gameOutput = new FakeOutput();
-        aGame = new Game(gameOutput);
+        aGame = new Game(gameOutput, QuestionBank.createDefaultQuestionBank(), new DefaultCategoryRule(), new DefaultPenaltyBoxRule());
         aGame.add("Chet");
         aGame.add("Pat");
     }
