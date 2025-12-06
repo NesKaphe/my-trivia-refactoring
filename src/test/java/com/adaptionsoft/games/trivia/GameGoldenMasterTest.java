@@ -43,7 +43,7 @@ public class GameGoldenMasterTest {
                 aGame.roll(rand.nextInt(5) + 1);
                 notAWinner = rand.nextInt(9) == 7
                         ? aGame.wrongAnswer()
-                        : aGame.wasCorrectlyAnswered();
+                        : aGame.correctAnswer();
             } while (notAWinner);
         });
 

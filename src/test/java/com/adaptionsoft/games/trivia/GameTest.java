@@ -43,7 +43,7 @@ public class GameTest {
     @Test
     void playerShouldNotGoToPenaltyBoxOnCorrectAnswer() {
         aGame.roll(1);
-        aGame.wasCorrectlyAnswered();
+        aGame.correctAnswer();
 
         Optional<Player> chet = gameOutput.getCapturedPlayer("Chet");
         assertTrue(chet.isPresent());
@@ -68,7 +68,7 @@ public class GameTest {
         assertTrue(pat.isPresent());
         assertEquals(gameOutput.getCurrentPlayer(), pat.get());
 
-        aGame.wasCorrectlyAnswered();
+        aGame.correctAnswer();
 
         // Back to first player
         aGame.roll(1);
@@ -83,7 +83,7 @@ public class GameTest {
         aGame.wrongAnswer();
 
         aGame.roll(1);
-        aGame.wasCorrectlyAnswered();
+        aGame.correctAnswer();
 
         aGame.roll(2);
 
@@ -98,13 +98,13 @@ public class GameTest {
         aGame.wrongAnswer();
 
         aGame.roll(1);
-        aGame.wasCorrectlyAnswered();
+        aGame.correctAnswer();
 
         aGame.roll(2);
 
         assertFalse(gameOutput.isCurrentTurnQuestionAsked());
 
-        aGame.wasCorrectlyAnswered();
+        aGame.correctAnswer();
         assertEquals(0, gameOutput.getCurrentTurnCorrectAnswers());
     }
 
@@ -114,7 +114,7 @@ public class GameTest {
         aGame.wrongAnswer();
 
         aGame.roll(1);
-        aGame.wasCorrectlyAnswered();
+        aGame.correctAnswer();
 
         aGame.roll(2);
         assertFalse(gameOutput.isCurrentTurnQuestionAsked());
@@ -129,7 +129,7 @@ public class GameTest {
         aGame.wrongAnswer();
 
         aGame.roll(1);
-        aGame.wasCorrectlyAnswered();
+        aGame.correctAnswer();
 
         aGame.roll(3);
 

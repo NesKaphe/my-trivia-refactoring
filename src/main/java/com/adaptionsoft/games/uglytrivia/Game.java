@@ -2,17 +2,15 @@ package com.adaptionsoft.games.uglytrivia;
 
 import com.adaptionsoft.games.uglytrivia.entity.Category;
 import com.adaptionsoft.games.uglytrivia.entity.Player;
+import com.adaptionsoft.games.uglytrivia.entity.PlayerRoaster;
 import com.adaptionsoft.games.uglytrivia.entity.QuestionBank;
 import com.adaptionsoft.games.uglytrivia.out.GameOutput;
 import com.adaptionsoft.games.uglytrivia.rule.CategoryRule;
 import com.adaptionsoft.games.uglytrivia.rule.PenaltyBoxRule;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Game {
 
-    private final List<Player> players;
+    private final PlayerRoaster playerRoaster;
     private final QuestionBank questionBank;
 
     private final CategoryRule categoryRule;
@@ -20,10 +18,8 @@ public class Game {
 
     private final GameOutput gameOutput;
 
-    int currentPlayer = 0;
-
     public Game(GameOutput gameOutput, QuestionBank questionBank, CategoryRule categoryRule, PenaltyBoxRule penaltyBoxRule) {
-        players = new ArrayList<>();
+        playerRoaster = new PlayerRoaster();
         this.questionBank = questionBank;
         this.categoryRule = categoryRule;
         this.penaltyBoxRule = penaltyBoxRule;
@@ -33,14 +29,14 @@ public class Game {
     public boolean add(String playerName) {
 
         Player player = new Player(playerName);
-        players.add(player);
+        playerRoaster.add(player);
 
-        gameOutput.printPlayerAdded(player, players.size());
+        gameOutput.printPlayerAdded(player, playerRoaster.size());
         return true;
     }
 
     public void roll(int roll) {
-        Player player = players.get(currentPlayer);
+        Player player = playerRoaster.getCurrentPlayer();
         gameOutput.printPlayerRoll(player, roll);
 
 
@@ -63,41 +59,34 @@ public class Game {
 
     }
 
-    public boolean wasCorrectlyAnswered() {
-        Player player = players.get(currentPlayer);
+    public boolean correctAnswer() {
+        Player player = playerRoaster.getCurrentPlayer();
 
-        if (canAnswerQuestion(player)) {
-            player.addCoin();
-            gameOutput.printCorrectAnswer(player);
+        if (player.isInPenaltyBox()) {
+            return endOfTurn(player);
         }
+
+        player.addCoin();
+        gameOutput.printCorrectAnswer(player);
 
         return endOfTurn(player);
     }
 
-    private boolean canAnswerQuestion(Player player) {
-        return !player.isInPenaltyBox();
-    }
-
     public boolean wrongAnswer() {
-        Player player = players.get(currentPlayer);
+        Player player = playerRoaster.getCurrentPlayer();
 
-        if(canAnswerQuestion(player)) {
-            gameOutput.printWrongAnswer(player);
-
-            player.toPenaltyBox();
+        if (player.isInPenaltyBox()) {
+            return endOfTurn(player);
         }
+
+        player.toPenaltyBox();
+        gameOutput.printWrongAnswer(player);
 
         return endOfTurn(player);
     }
 
     private boolean endOfTurn(Player player) {
-        nextPlayer();
+        playerRoaster.nextPlayer();
         return !player.didWin();
     }
-
-    private void nextPlayer() {
-        currentPlayer++;
-        if (currentPlayer == players.size()) currentPlayer = 0;
-    }
-
 }
