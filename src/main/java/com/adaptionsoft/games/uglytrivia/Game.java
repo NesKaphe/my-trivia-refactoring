@@ -1,6 +1,5 @@
 package com.adaptionsoft.games.uglytrivia;
 
-import com.adaptionsoft.games.uglytrivia.entity.Category;
 import com.adaptionsoft.games.uglytrivia.entity.Player;
 import com.adaptionsoft.games.uglytrivia.entity.PlayerRoaster;
 import com.adaptionsoft.games.uglytrivia.entity.QuestionBank;
@@ -17,6 +16,7 @@ public class Game {
     private final PenaltyBoxRule penaltyBoxRule;
 
     private final GameOutput gameOutput;
+    private Turn turn;
 
     public Game(GameOutput gameOutput, QuestionBank questionBank, CategoryRule categoryRule, PenaltyBoxRule penaltyBoxRule) {
         playerRoaster = new PlayerRoaster();
@@ -27,7 +27,6 @@ public class Game {
     }
 
     public boolean add(String playerName) {
-
         Player player = new Player(playerName);
         playerRoaster.add(player);
 
@@ -37,56 +36,30 @@ public class Game {
 
     public void roll(int roll) {
         Player player = playerRoaster.getCurrentPlayer();
-        gameOutput.printPlayerRoll(player, roll);
+        turn = new Turn(player, roll, questionBank, penaltyBoxRule, categoryRule, gameOutput);
 
+        turn.start();
 
-        if (player.isInPenaltyBox()) {
-            boolean canGetOutOfPenaltyBox = penaltyBoxRule.canGetOutOfPenaltyBoxWith(roll);
-            gameOutput.printPenaltyBoxExitStatus(player, canGetOutOfPenaltyBox);
-
-            if(!canGetOutOfPenaltyBox) {
-                return;
-            }
-
-            player.releaseFromPenaltyBox();
+        if (turn.isBlockedByPenaltyBox()){
+            return;
         }
 
-        player.moveBy(roll);
-        Category category = categoryRule.categoryFor(player);
-        String question = questionBank.drawQuestionFor(category);
+        turn.movingPhase();
 
-        gameOutput.printRollOutcome(player, category, question);
-
+        turn.askQuestionPhase();
     }
 
     public boolean correctAnswer() {
-        Player player = playerRoaster.getCurrentPlayer();
+        turn.correctAnswer();
 
-        if (player.isInPenaltyBox()) {
-            return endOfTurn(player);
-        }
-
-        player.addCoin();
-        gameOutput.printCorrectAnswer(player);
-
-        return endOfTurn(player);
+        playerRoaster.nextPlayer();
+        return turn.endOfTurn();
     }
 
     public boolean wrongAnswer() {
-        Player player = playerRoaster.getCurrentPlayer();
+        turn.wrongAnswer();
 
-        if (player.isInPenaltyBox()) {
-            return endOfTurn(player);
-        }
-
-        player.toPenaltyBox();
-        gameOutput.printWrongAnswer(player);
-
-        return endOfTurn(player);
-    }
-
-    private boolean endOfTurn(Player player) {
         playerRoaster.nextPlayer();
-        return !player.didWin();
+        return turn.endOfTurn();
     }
 }
