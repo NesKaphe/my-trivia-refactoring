@@ -76,13 +76,17 @@ public class Turn {
     }
 
     public boolean result() {
-        if(state != BLOCKED && state != FINISHED) {
+        if(!isFinished()) {
             throw new IllegalStateException("Turn not resolved");
         }
         return !player.didWin();
     }
 
-    public boolean hasAskedQuestion() {
+    public boolean isFinished() {
+        return state == BLOCKED || state == FINISHED;
+    }
+
+    public boolean isWaitingAnswer() {
         return WAITING_ANSWER.equals(state);
     }
 

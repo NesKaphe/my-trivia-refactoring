@@ -37,14 +37,22 @@ public class GameGoldenMasterTest {
             aGame.add("Pat");
             aGame.add("Sue");
 
-            boolean notAWinner;
+            boolean continueGame;
+            int randomNumber;
             do {
+                randomNumber = rand.nextInt(5) + 1;
+                aGame.roll(randomNumber);
 
-                aGame.roll(rand.nextInt(5) + 1);
-                notAWinner = rand.nextInt(9) == 7
-                        ? aGame.wrongAnswer()
-                        : aGame.correctAnswer();
-            } while (notAWinner);
+                continueGame = true;
+                randomNumber = rand.nextInt(9);
+
+                if(aGame.isAwaitingAnswer()) {
+                    continueGame = randomNumber == 7
+                            ? aGame.wrongAnswer()
+                            : aGame.correctAnswer();
+                }
+
+            } while (continueGame);
         });
 
         String actualOutput = out.toString();

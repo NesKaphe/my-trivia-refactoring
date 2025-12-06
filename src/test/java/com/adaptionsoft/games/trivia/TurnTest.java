@@ -41,7 +41,7 @@ public class TurnTest {
 
         turn.start();
 
-        assertTrue(turn.hasAskedQuestion());
+        assertTrue(turn.isWaitingAnswer());
     }
 
     @Test
@@ -52,7 +52,7 @@ public class TurnTest {
 
         turn.start();
 
-        assertFalse(turn.hasAskedQuestion());
+        assertFalse(turn.isWaitingAnswer());
     }
 
     @Test
