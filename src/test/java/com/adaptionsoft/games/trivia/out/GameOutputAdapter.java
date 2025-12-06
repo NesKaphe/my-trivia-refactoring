@@ -4,7 +4,7 @@ import com.adaptionsoft.games.uglytrivia.entity.Category;
 import com.adaptionsoft.games.uglytrivia.entity.Player;
 import com.adaptionsoft.games.uglytrivia.out.GameOutput;
 
-public abstract class GameOutputAdapter implements GameOutput {
+public class GameOutputAdapter implements GameOutput {
 
     @Override
     public void printWrongAnswer(Player player) {

@@ -7,13 +7,24 @@ import com.adaptionsoft.games.uglytrivia.out.GameOutput;
 import com.adaptionsoft.games.uglytrivia.rule.CategoryRule;
 import com.adaptionsoft.games.uglytrivia.rule.PenaltyBoxRule;
 
-class Turn {
+import static com.adaptionsoft.games.uglytrivia.Turn.State.*;
+
+public class Turn {
     private final Player player;
     private final int roll;
     private final GameOutput output;
     private final QuestionBank questionBank;
     private final PenaltyBoxRule penaltyBoxRule;
     private final CategoryRule categoryRule;
+
+    private State state;
+
+    enum State {
+        PENDING,
+        BLOCKED,
+        WAITING_ANSWER,
+        FINISHED
+    }
 
     public Turn(Player player, int roll, QuestionBank questionBank, PenaltyBoxRule penaltyBoxRule, CategoryRule categoryRule, GameOutput output) {
         this.player = player;
@@ -22,13 +33,60 @@ class Turn {
         this.questionBank = questionBank;
         this.penaltyBoxRule = penaltyBoxRule;
         this.categoryRule = categoryRule;
+
+        this.state = PENDING;
     }
 
     public void start() {
+        if(!PENDING.equals(state)) {
+            throw new IllegalStateException("Turn already started");
+        }
+
         output.printPlayerRoll(player, roll);
+
+        if (isBlockedByPenaltyBox()){
+            state = BLOCKED;
+            return;
+        }
+
+        movingPhase();
+        askQuestionPhase();
     }
 
-    public boolean isBlockedByPenaltyBox() {
+    public void wrongAnswer() {
+        if (!WAITING_ANSWER.equals(state)) {
+            throw new IllegalStateException("Not expecting an answer");
+        }
+
+        player.toPenaltyBox();
+        output.printWrongAnswer(player);
+
+        state = FINISHED;
+    }
+
+    public void correctAnswer() {
+        if (!WAITING_ANSWER.equals(state)) {
+            throw new IllegalStateException("Not expecting an answer");
+        }
+
+        player.addCoin();
+        output.printCorrectAnswer(player);
+
+        state = FINISHED;
+    }
+
+    public boolean result() {
+        if(state != BLOCKED && state != FINISHED) {
+            throw new IllegalStateException("Turn not resolved");
+        }
+        return !player.didWin();
+    }
+
+    public boolean hasAskedQuestion() {
+        return WAITING_ANSWER.equals(state);
+    }
+
+    private boolean isBlockedByPenaltyBox() {
         if (player.isInPenaltyBox()) {
             boolean canGetOutOfPenaltyBox = penaltyBoxRule.canGetOutOfPenaltyBoxWith(roll);
             output.printPenaltyBoxExitStatus(player, canGetOutOfPenaltyBox);
@@ -42,32 +100,16 @@ class Turn {
         return false;
     }
 
-    public void movingPhase() {
+    private void movingPhase() {
         player.moveBy(roll);
     }
 
-    public void askQuestionPhase() {
+    private void askQuestionPhase() {
         Category category = categoryRule.categoryFor(player);
         String question = questionBank.drawQuestionFor(category);
 
         output.printRollOutcome(player, category, question);
-    }
 
-    public void wrongAnswer() {
-        if (!player.isInPenaltyBox()) {
-            player.toPenaltyBox();
-            output.printWrongAnswer(player);
-        }
-    }
-
-    public boolean endOfTurn() {
-        return !player.didWin();
-    }
-
-    public void correctAnswer() {
-        if (!player.isInPenaltyBox()) {
-            player.addCoin();
-            output.printCorrectAnswer(player);
-        }
+        state = WAITING_ANSWER;
     }
 }

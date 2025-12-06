@@ -30,27 +30,6 @@ public class GameTest {
     }
 
     @Test
-    void playerShouldGoToPenaltyBoxOnWrongAnswer() {
-        aGame.roll(1);
-        aGame.wrongAnswer();
-
-        Optional<Player> chet = gameOutput.getCapturedPlayer("Chet");
-        assertTrue(chet.isPresent());
-        assertTrue(chet.get().isInPenaltyBox());
-    }
-
-
-    @Test
-    void playerShouldNotGoToPenaltyBoxOnCorrectAnswer() {
-        aGame.roll(1);
-        aGame.correctAnswer();
-
-        Optional<Player> chet = gameOutput.getCapturedPlayer("Chet");
-        assertTrue(chet.isPresent());
-        assertFalse(chet.get().isInPenaltyBox());
-    }
-
-    @Test
     void playersRotationShouldOccurEachTurn() {
         // First player
         aGame.roll(1);
@@ -136,6 +115,31 @@ public class GameTest {
         Optional<Player> chet = gameOutput.getCapturedPlayer("Chet");
         assertTrue(chet.isPresent());
         assertFalse(chet.get().isInPenaltyBox());
+    }
+
+    @Test
+    void gameShouldNotAwaitAnswerWithoutARollForPlayerOutOfPenaltyBox() {
+        assertFalse(aGame.isAwaitingAnswer());
+    }
+
+    @Test
+    void gameShouldAwaitAnswerForPlayerOutOfPenaltyBox() {
+        aGame.roll(2);
+
+        assertTrue(aGame.isAwaitingAnswer());
+    }
+
+    @Test
+    void gameShouldNotAwaitAnswerForPlayerBlockedInPenaltyBox() {
+        aGame.roll(1);
+        aGame.wrongAnswer();
+
+        aGame.roll(1);
+        aGame.correctAnswer();
+
+        aGame.roll(2);
+
+        assertFalse(aGame.isAwaitingAnswer());
     }
 
     static class FakeOutput extends GameOutputAdapter {

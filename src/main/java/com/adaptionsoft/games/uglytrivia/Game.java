@@ -39,27 +39,27 @@ public class Game {
         turn = new Turn(player, roll, questionBank, penaltyBoxRule, categoryRule, gameOutput);
 
         turn.start();
-
-        if (turn.isBlockedByPenaltyBox()){
-            return;
-        }
-
-        turn.movingPhase();
-
-        turn.askQuestionPhase();
     }
 
     public boolean correctAnswer() {
-        turn.correctAnswer();
+        if(turn.hasAskedQuestion()) {
+            turn.correctAnswer();
+        }
 
         playerRoaster.nextPlayer();
-        return turn.endOfTurn();
+        return turn.result();
     }
 
     public boolean wrongAnswer() {
-        turn.wrongAnswer();
+        if(turn.hasAskedQuestion()) {
+            turn.wrongAnswer();
+        }
 
         playerRoaster.nextPlayer();
-        return turn.endOfTurn();
+        return turn.result();
+    }
+
+    public boolean isAwaitingAnswer() {
+        return turn != null && turn.hasAskedQuestion();
     }
 }
