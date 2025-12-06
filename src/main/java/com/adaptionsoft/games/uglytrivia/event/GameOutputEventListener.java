@@ -1,8 +1,6 @@
 package com.adaptionsoft.games.uglytrivia.event;
 
-import com.adaptionsoft.games.uglytrivia.event.payload.GameEventPayload;
-import com.adaptionsoft.games.uglytrivia.event.payload.PlayerRolledPayload;
-import com.adaptionsoft.games.uglytrivia.event.payload.RollOutcomePayload;
+import com.adaptionsoft.games.uglytrivia.event.payload.*;
 import com.adaptionsoft.games.uglytrivia.out.GameOutput;
 
 public class GameOutputEventListener implements GameEventListener {
@@ -15,10 +13,13 @@ public class GameOutputEventListener implements GameEventListener {
 
     @Override
     public void receive(GameEventPayload e) {
-        if(e instanceof PlayerRolledPayload playerRolledPayload) {
-            gameOutput.printPlayerRoll(playerRolledPayload.player(), playerRolledPayload.roll());
-        } else if (e instanceof  RollOutcomePayload rollOutcomePayload) {
-            gameOutput.printRollOutcome(rollOutcomePayload.player(), rollOutcomePayload.category(), rollOutcomePayload.question());
+        switch (e) {
+            case PlayerRolledPayload payload            -> gameOutput.printPlayerRoll(payload.player(), payload.roll());
+            case RollOutcomePayload payload             -> gameOutput.printRollOutcome(payload.player(), payload.category(), payload.question());
+            case PlayerAddedPayload payload             -> gameOutput.printPlayerAdded(payload.player(), payload.playerNumber());
+            case WrongAnswerPayload payload             -> gameOutput.printWrongAnswer(payload.player());
+            case CorrectAnswerPayload payload           -> gameOutput.printCorrectAnswer(payload.player());
+            case PenaltyBoxReleaseStatusPayload payload -> gameOutput.printPenaltyBoxExitStatus(payload.player(), payload.canGetOutOfPenaltyBox());
         }
     }
 }
