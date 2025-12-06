@@ -127,6 +127,28 @@ public class TurnTest {
         assertDoesNotThrow(turn::result);
     }
 
+    @Test
+    void playerShouldNotGetOutOfPenaltyBoxOnPairRollWhenAlreadyInPenaltyBox() {
+        Player chet = new Player("Chet");
+        chet.toPenaltyBox();
+        Turn turn = createTurnFor(chet, 2);
+
+        turn.start();
+
+        assertTrue(chet.isInPenaltyBox());
+    }
+
+    @Test
+    void playerInPenaltyBoxShouldGetOutOfPenaltyBoxOnOddRoll() {
+        Player chet = new Player("Chet");
+        chet.toPenaltyBox();
+        Turn turn = createTurnFor(chet, 3);
+
+        turn.start();
+
+        assertFalse(chet.isInPenaltyBox());
+    }
+
     private static Turn createTurnFor(Player chet, int roll) {
         return new Turn(chet, roll, QuestionBank.createDefaultQuestionBank(), new DefaultPenaltyBoxRule(), new DefaultCategoryRule(), new GameOutputAdapter());
     }

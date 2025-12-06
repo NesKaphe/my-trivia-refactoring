@@ -35,6 +35,10 @@ public class Game {
     }
 
     public void roll(int roll) {
+        if(turn != null && !turn.isFinished()) {
+            throw new IllegalStateException("Cannot start new turn before resolving previous one");
+        }
+
         Player player = playerRoaster.getCurrentPlayer();
         turn = new Turn(player, roll, questionBank, penaltyBoxRule, categoryRule, gameOutput);
 
@@ -46,6 +50,10 @@ public class Game {
     }
 
     public boolean correctAnswer() {
+        if(turn == null) {
+            throw new IllegalStateException("No active turn");
+        }
+
         turn.correctAnswer();
 
         playerRoaster.nextPlayer();
@@ -53,6 +61,10 @@ public class Game {
     }
 
     public boolean wrongAnswer() {
+        if(turn == null) {
+            throw new IllegalStateException("No active turn");
+        }
+
         turn.wrongAnswer();
 
         playerRoaster.nextPlayer();

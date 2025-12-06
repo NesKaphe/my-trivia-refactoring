@@ -57,67 +57,6 @@ public class GameTest {
     }
 
     @Test
-    void playerShouldNotGetOutOfPenaltyBoxOnPairRollWhenAlreadyInPenaltyBox() {
-        aGame.roll(1);
-        aGame.wrongAnswer();
-
-        aGame.roll(1);
-        aGame.correctAnswer();
-
-        aGame.roll(2);
-
-        Optional<Player> chet = gameOutput.getCapturedPlayer("Chet");
-        assertTrue(chet.isPresent());
-        assertTrue(chet.get().isInPenaltyBox());
-    }
-
-    @Test
-    void playerInPenaltyBoxShouldNotGetToAnswerCorrectlyToQuestion() {
-        aGame.roll(1);
-        aGame.wrongAnswer();
-
-        aGame.roll(1);
-        aGame.correctAnswer();
-
-        aGame.roll(2);
-
-        assertFalse(gameOutput.isCurrentTurnQuestionAsked());
-
-        aGame.correctAnswer();
-        assertEquals(0, gameOutput.getCurrentTurnCorrectAnswers());
-    }
-
-    @Test
-    void playerInPenaltyBoxShouldNotGetToAnswerIncorrectlyToQuestion() {
-        aGame.roll(1);
-        aGame.wrongAnswer();
-
-        aGame.roll(1);
-        aGame.correctAnswer();
-
-        aGame.roll(2);
-        assertFalse(gameOutput.isCurrentTurnQuestionAsked());
-
-        aGame.wrongAnswer();
-        assertEquals(0, gameOutput.getCurrentTurnWrongAnswers());
-    }
-
-    @Test
-    void playerInPenaltyBoxShouldGetOutOfPenaltyBoxOnOddRoll() {
-        aGame.roll(1);
-        aGame.wrongAnswer();
-
-        aGame.roll(1);
-        aGame.correctAnswer();
-
-        aGame.roll(3);
-
-        Optional<Player> chet = gameOutput.getCapturedPlayer("Chet");
-        assertTrue(chet.isPresent());
-        assertFalse(chet.get().isInPenaltyBox());
-    }
-
-    @Test
     void gameShouldNotAwaitAnswerWithoutARollForPlayerOutOfPenaltyBox() {
         assertFalse(aGame.isAwaitingAnswer());
     }
@@ -142,13 +81,31 @@ public class GameTest {
         assertFalse(aGame.isAwaitingAnswer());
     }
 
+    @Test
+    void gameShouldNotAcceptRollWhenPreviousTurnIsNotFinished() {
+        aGame.roll(1);
+
+        var ex = assertThrows(IllegalStateException.class, () -> aGame.roll(1));
+        assertEquals("Cannot start new turn before resolving previous one", ex.getMessage());
+    }
+
+    @Test
+    void gameShouldNotAcceptCorrectAnswersWithoutActiveTurn() {
+        var ex = assertThrows(IllegalStateException.class, aGame::correctAnswer);
+
+        assertEquals("No active turn", ex.getMessage());
+    }
+
+    @Test
+    void gameShouldNotAcceptWrongAnswersWithoutActiveTurn() {
+        var ex = assertThrows(IllegalStateException.class, aGame::wrongAnswer);
+
+        assertEquals("No active turn", ex.getMessage());
+    }
+
     static class FakeOutput extends GameOutputAdapter {
         private final List<Player> capturedPlayers = new ArrayList<>();
         private Player currentPlayer;
-
-        private boolean currentTurnQuestionAsked = false;
-        private int currentTurnCorrectAnswers = 0;
-        private int currentTurnWrongAnswers = 0;
 
         @Override
         public void printPlayerAdded(Player player, int playerNumber) {
@@ -158,24 +115,6 @@ public class GameTest {
         @Override
         public void printPlayerRoll(Player player, int roll) {
             currentPlayer = player;
-            currentTurnCorrectAnswers = 0;
-            currentTurnWrongAnswers = 0;
-            currentTurnQuestionAsked = false;
-        }
-
-        @Override
-        public void printRollOutcome(Player player, Category category, String question) {
-            currentTurnQuestionAsked = true;
-        }
-
-        @Override
-        public void printWrongAnswer(Player player) {
-            currentTurnWrongAnswers++;
-        }
-
-        @Override
-        public void printCorrectAnswer(Player player) {
-            currentTurnCorrectAnswers++;
         }
 
         public Optional<Player> getCapturedPlayer(String playerName) {
@@ -184,18 +123,6 @@ public class GameTest {
 
         public Player getCurrentPlayer() {
             return currentPlayer;
-        }
-
-        public int getCurrentTurnCorrectAnswers() {
-            return currentTurnCorrectAnswers;
-        }
-
-        public int getCurrentTurnWrongAnswers() {
-            return currentTurnWrongAnswers;
-        }
-
-        public boolean isCurrentTurnQuestionAsked() {
-            return currentTurnQuestionAsked;
         }
     }
 }
