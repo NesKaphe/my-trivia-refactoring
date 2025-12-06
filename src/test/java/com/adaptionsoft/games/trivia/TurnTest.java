@@ -14,7 +14,7 @@ public class TurnTest {
 
     @Test
     void playerShouldGoToPenaltyBoxOnWrongAnswer() {
-        Player chet = new Player("chet");
+        Player chet = new Player("player");
         Turn turn = createTurnFor(chet, 1);
 
         turn.start();
@@ -25,7 +25,7 @@ public class TurnTest {
 
     @Test
     void playerShouldNotGoToPenaltyBoxOnCorrectAnswer() {
-        Player chet = new Player("chet");
+        Player chet = new Player("player");
         Turn turn = createTurnFor(chet, 1);
 
         turn.start();
@@ -36,7 +36,7 @@ public class TurnTest {
 
     @Test
     void turnShouldAskQuestionForPlayerOutOfPenaltyBox() {
-        Player chet = new Player("chet");
+        Player chet = new Player("player");
         Turn turn = createTurnFor(chet, 1);
 
         turn.start();
@@ -46,7 +46,7 @@ public class TurnTest {
 
     @Test
     void turnShouldNotAskQuestionForPlayerBlockedInPenaltyBox() {
-        Player chet = new Player("chet");
+        Player chet = new Player("player");
         chet.toPenaltyBox();
         Turn turn = createTurnFor(chet, 2);
 
@@ -57,7 +57,7 @@ public class TurnTest {
 
     @Test
     void turnShouldNotAllowAnswerWhenNoQuestionWasAsked() {
-        Player chet = new Player("chet");
+        Player chet = new Player("player");
         Turn turn = createTurnFor(chet, 3);
 
         var ex = assertThrows(IllegalStateException.class, turn::correctAnswer);
@@ -69,7 +69,7 @@ public class TurnTest {
 
     @Test
     void turnShouldNotAllowMultipleAnswers() {
-        Player chet = new Player("chet");
+        Player chet = new Player("player");
         Turn turn = createTurnFor(chet, 3);
 
         turn.start();

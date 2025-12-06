@@ -2,7 +2,6 @@ package com.adaptionsoft.games.trivia;
 
 import com.adaptionsoft.games.trivia.out.GameOutputAdapter;
 import com.adaptionsoft.games.uglytrivia.Game;
-import com.adaptionsoft.games.uglytrivia.entity.Category;
 import com.adaptionsoft.games.uglytrivia.entity.Player;
 import com.adaptionsoft.games.uglytrivia.entity.QuestionBank;
 import com.adaptionsoft.games.uglytrivia.rule.DefaultCategoryRule;
