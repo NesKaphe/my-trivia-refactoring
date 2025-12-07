@@ -3,7 +3,8 @@ package com.adaptionsoft.games.uglytrivia;
 import com.adaptionsoft.games.uglytrivia.entity.Category;
 import com.adaptionsoft.games.uglytrivia.entity.Player;
 import com.adaptionsoft.games.uglytrivia.entity.QuestionBank;
-import com.adaptionsoft.games.uglytrivia.out.GameOutput;
+import com.adaptionsoft.games.uglytrivia.event.GameEventPublisher;
+import com.adaptionsoft.games.uglytrivia.event.payload.*;
 import com.adaptionsoft.games.uglytrivia.rule.CategoryRule;
 import com.adaptionsoft.games.uglytrivia.rule.PenaltyBoxRule;
 
@@ -12,10 +13,11 @@ import static com.adaptionsoft.games.uglytrivia.Turn.State.*;
 public class Turn {
     private final Player player;
     private final int roll;
-    private final GameOutput output;
     private final QuestionBank questionBank;
     private final PenaltyBoxRule penaltyBoxRule;
     private final CategoryRule categoryRule;
+    private final GameEventPublisher gameEventPublisher;
+
 
     private State state;
 
@@ -26,13 +28,13 @@ public class Turn {
         FINISHED
     }
 
-    public Turn(Player player, int roll, QuestionBank questionBank, PenaltyBoxRule penaltyBoxRule, CategoryRule categoryRule, GameOutput output) {
+    public Turn(Player player, int roll, QuestionBank questionBank, PenaltyBoxRule penaltyBoxRule, CategoryRule categoryRule, GameEventPublisher gameEventPublisher) {
         this.player = player;
         this.roll = roll;
-        this.output = output;
         this.questionBank = questionBank;
         this.penaltyBoxRule = penaltyBoxRule;
         this.categoryRule = categoryRule;
+        this.gameEventPublisher = gameEventPublisher;
 
         this.state = PENDING;
     }
@@ -42,7 +44,7 @@ public class Turn {
             throw new IllegalStateException("Turn already started");
         }
 
-        output.printPlayerRoll(player, roll);
+        gameEventPublisher.publish(new PlayerRolledPayload(player, roll));
 
         if (isBlockedByPenaltyBox()){
             state = BLOCKED;
@@ -59,7 +61,7 @@ public class Turn {
         }
 
         player.toPenaltyBox();
-        output.printWrongAnswer(player);
+        gameEventPublisher.publish(new WrongAnswerPayload(player));
 
         state = FINISHED;
     }
@@ -70,7 +72,7 @@ public class Turn {
         }
 
         player.addCoin();
-        output.printCorrectAnswer(player);
+        gameEventPublisher.publish(new CorrectAnswerPayload(player));
 
         state = FINISHED;
     }
@@ -93,7 +95,7 @@ public class Turn {
     private boolean isBlockedByPenaltyBox() {
         if (player.isInPenaltyBox()) {
             boolean canGetOutOfPenaltyBox = penaltyBoxRule.canGetOutOfPenaltyBoxWith(roll);
-            output.printPenaltyBoxExitStatus(player, canGetOutOfPenaltyBox);
+            gameEventPublisher.publish(new PenaltyBoxReleaseStatusPayload(player, canGetOutOfPenaltyBox));
 
             if (!canGetOutOfPenaltyBox) {
                 return true;
@@ -112,7 +114,7 @@ public class Turn {
         Category category = categoryRule.categoryFor(player);
         String question = questionBank.drawQuestionFor(category);
 
-        output.printRollOutcome(player, category, question);
+        gameEventPublisher.publish(new RollOutcomePayload(player, category, question));
 
         state = WAITING_ANSWER;
     }

@@ -3,34 +3,36 @@ package com.adaptionsoft.games.uglytrivia;
 import com.adaptionsoft.games.uglytrivia.entity.Player;
 import com.adaptionsoft.games.uglytrivia.entity.PlayerRoaster;
 import com.adaptionsoft.games.uglytrivia.entity.QuestionBank;
-import com.adaptionsoft.games.uglytrivia.out.GameOutput;
+import com.adaptionsoft.games.uglytrivia.event.GameEventPublisher;
+import com.adaptionsoft.games.uglytrivia.event.payload.PlayerAddedPayload;
 import com.adaptionsoft.games.uglytrivia.rule.CategoryRule;
 import com.adaptionsoft.games.uglytrivia.rule.PenaltyBoxRule;
 
 public class Game {
 
+    private final GameEventPublisher gameEventPublisher;
     private final PlayerRoaster playerRoaster;
     private final QuestionBank questionBank;
 
     private final CategoryRule categoryRule;
     private final PenaltyBoxRule penaltyBoxRule;
 
-    private final GameOutput gameOutput;
     private Turn turn;
 
-    public Game(GameOutput gameOutput, QuestionBank questionBank, CategoryRule categoryRule, PenaltyBoxRule penaltyBoxRule) {
+    public Game(GameEventPublisher gameEventPublisher, QuestionBank questionBank, CategoryRule categoryRule, PenaltyBoxRule penaltyBoxRule) {
         playerRoaster = new PlayerRoaster();
         this.questionBank = questionBank;
         this.categoryRule = categoryRule;
         this.penaltyBoxRule = penaltyBoxRule;
-        this.gameOutput = gameOutput;
+        this.gameEventPublisher = gameEventPublisher;
     }
 
     public boolean add(String playerName) {
         Player player = new Player(playerName);
         playerRoaster.add(player);
 
-        gameOutput.printPlayerAdded(player, playerRoaster.size());
+        gameEventPublisher.publish(new PlayerAddedPayload(player, playerRoaster.size()));
+
         return true;
     }
 
@@ -40,7 +42,7 @@ public class Game {
         }
 
         Player player = playerRoaster.getCurrentPlayer();
-        turn = new Turn(player, roll, questionBank, penaltyBoxRule, categoryRule, gameOutput);
+        turn = new Turn(player, roll, questionBank, penaltyBoxRule, categoryRule, gameEventPublisher);
 
         turn.start();
 

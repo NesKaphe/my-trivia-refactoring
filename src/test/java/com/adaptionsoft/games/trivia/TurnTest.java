@@ -1,9 +1,9 @@
 package com.adaptionsoft.games.trivia;
 
-import com.adaptionsoft.games.trivia.out.GameOutputAdapter;
 import com.adaptionsoft.games.uglytrivia.Turn;
 import com.adaptionsoft.games.uglytrivia.entity.Player;
 import com.adaptionsoft.games.uglytrivia.entity.QuestionBank;
+import com.adaptionsoft.games.uglytrivia.event.GameEventPublisher;
 import com.adaptionsoft.games.uglytrivia.rule.DefaultCategoryRule;
 import com.adaptionsoft.games.uglytrivia.rule.DefaultPenaltyBoxRule;
 import org.junit.jupiter.api.Test;
@@ -150,7 +150,7 @@ public class TurnTest {
     }
 
     private static Turn createTurnFor(Player chet, int roll) {
-        return new Turn(chet, roll, QuestionBank.createDefaultQuestionBank(), new DefaultPenaltyBoxRule(), new DefaultCategoryRule(), new GameOutputAdapter());
+        return new Turn(chet, roll, QuestionBank.createDefaultQuestionBank(), new DefaultPenaltyBoxRule(), new DefaultCategoryRule(), new GameEventPublisher());
     }
 
 }
